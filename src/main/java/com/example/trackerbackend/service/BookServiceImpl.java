@@ -10,9 +10,12 @@ import com.example.trackerbackend.entity.Book;
 import com.example.trackerbackend.entity.BookStatus;
 import com.example.trackerbackend.entity.Tag;
 import com.example.trackerbackend.entity.User;
-import com.example.trackerbackend.utils.EntityConversionUtils;
+import com.example.trackerbackend.entity.principal.CustomUserDetails;
+import com.example.trackerbackend.utils.conversion.EntityConversionUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,7 +34,9 @@ public class BookServiceImpl implements BookService {
     private final TagDAO tagDAO;
 
     private User getAuthenticatedUser() {
-        Integer userId = null; // TODO: Extract from JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails =  (CustomUserDetails) authentication.getPrincipal();
+        Integer userId = userDetails.getId();
         return userDAO.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found!"));
     }
