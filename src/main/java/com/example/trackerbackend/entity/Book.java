@@ -62,4 +62,12 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "books_tags",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns =  @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 }
