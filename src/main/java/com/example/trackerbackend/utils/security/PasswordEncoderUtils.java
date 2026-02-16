@@ -1,4 +1,4 @@
-package com.example.trackerbackend.utils;
+package com.example.trackerbackend.utils.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

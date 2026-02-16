@@ -1,4 +1,4 @@
-package com.example.trackerbackend.utils;
+package com.example.trackerbackend.utils.conversion;
 
 import com.example.trackerbackend.DTO.response.BookDTO;
 import com.example.trackerbackend.DTO.response.UserDTO;
