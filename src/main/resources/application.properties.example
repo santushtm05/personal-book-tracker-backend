@@ -1,0 +1,27 @@
+spring.application.name=tracker-backend
+spring.main.banner-mode=off
+spring.main.lazy-initialization=true
+
+# Logging Level Configuration
+logging.level.root=warn
+logging.level.sql=debug
+logging.level.web=warn
+
+
+# Database Configuration
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/personal_book_tracker
+spring.datasource.username=
+spring.datasource.password=
+
+# JWT Config
+jwt.secret=<your-jwt-secret>
+jwt.expiration=900000
+
+# Swagger config
+springdoc.swagger-ui.config-url=/v3/api-docs/swagger-config
+springdoc.swagger-ui.url=/v3/api-docs
+
+# Flyway Configuration
+spring.flyway.enabled=true
+spring.flyway.baseline-on-migrate=true
