@@ -95,7 +95,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(config -> config
                         .requestMatchers(
                                 "/api/auth/login",
-                                "/api/auth/register"
+                                "/api/auth/register",
+                                "/api/auth/username-available"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,"/*").permitAll()
 
@@ -108,10 +109,28 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/users/**")
                         .hasRole("USER")
 
+                        .requestMatchers(HttpMethod.PATCH, "/api/users/**")
+                        .hasAnyRole("USER")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**")
+                        .hasAnyRole("USER")
+
                         .requestMatchers(HttpMethod.GET, "/api/books/**")
                         .hasAnyRole("USER")
 
                         .requestMatchers(HttpMethod.POST, "/api/books/**")
+                        .hasAnyRole("USER")
+
+                        .requestMatchers(HttpMethod.PATCH, "/api/books/**")
+                        .hasAnyRole("USER")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/**")
+                        .hasAnyRole("USER")
+
+                        .requestMatchers(HttpMethod.GET, "/api/tags/**")
+                        .hasAnyRole("USER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/tags/**")
                         .hasAnyRole("USER")
 
                         .anyRequest().authenticated()
