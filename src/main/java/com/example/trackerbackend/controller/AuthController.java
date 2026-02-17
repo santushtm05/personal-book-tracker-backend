@@ -5,7 +5,6 @@ import com.example.trackerbackend.DTO.request.user.UserCreationRequestDTO;
 import com.example.trackerbackend.DTO.response.APIResponse;
 import com.example.trackerbackend.DTO.response.UserDTO;
 import com.example.trackerbackend.DTO.response.auth.LoginResponse;
-import com.example.trackerbackend.entity.User;
 import com.example.trackerbackend.entity.principal.CustomUserDetails;
 import com.example.trackerbackend.service.AuthService;
 import com.example.trackerbackend.service.UserService;
