@@ -11,6 +11,9 @@ import com.example.trackerbackend.entity.BookStatus;
 import com.example.trackerbackend.entity.Tag;
 import com.example.trackerbackend.entity.User;
 import com.example.trackerbackend.entity.principal.CustomUserDetails;
+import com.example.trackerbackend.exception.ResourceNotFoundException;
+import com.example.trackerbackend.exception.UnauthorizedException;
+import com.example.trackerbackend.exception.ValidationException;
 import com.example.trackerbackend.utils.conversion.EntityConversionUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -38,15 +41,15 @@ public class BookServiceImpl implements BookService {
         CustomUserDetails userDetails =  (CustomUserDetails) authentication.getPrincipal();
         Integer userId = userDetails.getId();
         return userDAO.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
     }
 
     private Book getUserOwnedBook(Integer bookId, User user) {
-        Book book = bookDAO.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found!"));
+        Book book = bookDAO.findById(bookId).orElseThrow(() -> new ResourceNotFoundException("Book"));
         if (!book.getUser().getId().equals(user.getId()))
-            throw new RuntimeException("Unauthorized access to book");
+            throw new UnauthorizedException("Unauthorized Access!");
         if (book.getDeletedAt() != null)
-            throw new RuntimeException("Book is deleted");
+            throw new ResourceNotFoundException("Book");
         return book;
     }
 
@@ -63,12 +66,12 @@ public class BookServiceImpl implements BookService {
             book.setStatus(BookStatus.valueOf(request.getStatus()));
         if (request.getRating() != null) {
             if (request.getRating() < 0 || request.getRating() > 5)
-                throw new RuntimeException("Rating must be between 0 and 5");
+                throw new ValidationException("Rating must be between 0 and 5");
             book.setRating(request.getRating());
         }
         if (request.getPages() != null) {
             if (request.getPages() <= 0)
-                throw new RuntimeException("Pages must be greater than 0");
+                throw new ValidationException("Pages must be greater than 0");
             book.setPages(request.getPages());
         }
         if (request.getThumbnailUrl() != null)
@@ -78,7 +81,7 @@ public class BookServiceImpl implements BookService {
         if(request.getTagIds() != null) {
             Set<Tag> tags = new HashSet<>();
             for(int tagId : request.getTagIds()) {
-                tags.add(tagDAO.findById(tagId).orElseThrow(() -> new RuntimeException("Tag not found!")));
+                tags.add(tagDAO.findById(tagId).orElseThrow(() -> new ResourceNotFoundException("Tag")));
             }
             book.setTags(tags);
         }
@@ -108,7 +111,7 @@ public class BookServiceImpl implements BookService {
         // Set Tags for book
         Set<Tag> tags = new HashSet<>();
         for(int tagId : request.getTagIds()){
-            Tag tag = tagDAO.findById(tagId).orElseThrow(() -> new RuntimeException("Tag not found!"));
+            Tag tag = tagDAO.findById(tagId).orElseThrow(() -> new ResourceNotFoundException("Tag"));
             tags.add(tag);
         }
         book.setTags(tags);
@@ -124,7 +127,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public BookDTO updateBook(BookUpdationRequestDTO request, Integer bookId) {
         if (bookId == null)
-            throw new RuntimeException("Book id is required");
+            throw new ValidationException("Book id is required");
 
         User user = getAuthenticatedUser();
         Book book = getUserOwnedBook(bookId, user);
@@ -170,12 +173,12 @@ public class BookServiceImpl implements BookService {
         try {
             bookStatus = BookStatus.valueOf(status);
         } catch (IllegalArgumentException ex) {
-            throw new RuntimeException("Invalid book status");
+            throw new ValidationException("Invalid book status");
         }
         List<Book> booksFromDB =
                 bookDAO.findByUserIdAndStatus(user.getId(), bookStatus);
         if (booksFromDB.isEmpty())
-            throw new RuntimeException("Books not found!");
+            return  new  ArrayList<>();
         List<BookDTO> result = new ArrayList<>();
         for (Book book : booksFromDB)
             result.add(EntityConversionUtils.toBookDTO(book));
@@ -193,7 +196,7 @@ public class BookServiceImpl implements BookService {
                 bookDAO.findByUserId(user.getId());
 
         if (booksFromDB.isEmpty())
-            throw new RuntimeException("Books not found!");
+            return new   ArrayList<>();
 
         List<BookDTO> result = new ArrayList<>();
 
@@ -213,7 +216,7 @@ public class BookServiceImpl implements BookService {
                 bookDAO.findByUserIdAndTagsContaining(user.getId(), tag);
 
         if (booksFromDB.isEmpty())
-            throw new RuntimeException("Books not found!");
+            return new ArrayList<>();
 
         List<BookDTO> result = new ArrayList<>();
 

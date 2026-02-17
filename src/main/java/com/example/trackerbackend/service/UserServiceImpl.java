@@ -6,6 +6,9 @@ import com.example.trackerbackend.DTO.request.user.UserUpdationRequestDTO;
 import com.example.trackerbackend.DTO.response.UserDTO;
 import com.example.trackerbackend.entity.User;
 import com.example.trackerbackend.entity.principal.CustomUserDetails;
+import com.example.trackerbackend.exception.DuplicateResourceException;
+import com.example.trackerbackend.exception.ForbiddenException;
+import com.example.trackerbackend.exception.ResourceNotFoundException;
 import com.example.trackerbackend.utils.conversion.EntityConversionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -39,7 +42,7 @@ public class UserServiceImpl implements UserService {
         System.out.println("Username In request: "+request.getUsername());
         System.out.println("Executing CHeck: "+userDAO.existsByUsernameAndDeletedAtIsNull(request.getUsername()));
         if (userDAO.existsByUsernameAndDeletedAtIsNull(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new DuplicateResourceException("Username");
         }
 
         User user = User.builder()
@@ -59,13 +62,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO updateUser(UserUpdationRequestDTO request) {
         if(!validateRequestedUserId(request.getId())) {
-            throw new RuntimeException("Forbidden!");
+            throw new ForbiddenException("Forbidden!");
         }
         User user = userDAO.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getDeletedAt() != null) {
-            throw new RuntimeException("User is deleted");
+            throw new ResourceNotFoundException("User");
         }
 
         // Null-safe patch update
@@ -83,14 +86,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void softDelete(Integer userId) {
         if(validateRequestedUserId(userId)) {
-            throw new RuntimeException("Forbidden!");
+            throw new ForbiddenException("Forbidden!");
         }
-        // add validation for user deleting himself and not other user
         User user = userDAO.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
 
         if (user.getDeletedAt() != null) {
-            throw new RuntimeException("User already deleted");
+            throw new ResourceNotFoundException("User");
         }
 
         user.setDeletedAt(LocalDateTime.now());
@@ -102,20 +104,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserById(Integer userId) {
         User userDB = userDAO.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
         return EntityConversionUtils.toUserDTO(userDB);
     }
 
     @Override
     public User getById(Integer userId) {
         User userDB = userDAO.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
         return userDB;
     }
 
     @Override
     public User getByUsername(String username) {
-        User userDB = userDAO.findByUsernameAndDeletedAtIsNull(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User userDB = userDAO.findByUsernameAndDeletedAtIsNull(username).orElseThrow(() -> new ResourceNotFoundException("User"));
         return userDB;
     }
 

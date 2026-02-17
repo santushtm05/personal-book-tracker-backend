@@ -20,11 +20,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     public UserDetails loadUserById(Integer id) {
-        System.out.println("Loading User for id: "+id);
+//        System.out.println("Loading User for id: "+id);
         User user = userDAO.findById(id)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found"));
-        System.out.println("Got User:"+user+"\n Password:"+user.getPassword());
+//        System.out.println("Got User:"+user+"\n Password:"+user.getPassword());
         return new CustomUserDetails(user);
     }
 
