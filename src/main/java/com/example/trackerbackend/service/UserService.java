@@ -12,4 +12,5 @@ public interface UserService {
     UserDTO getUserById(Integer userId);
     User getByUsername(String username);
     User getById(Integer userId);
+    boolean existsByUsername(String username);
 }

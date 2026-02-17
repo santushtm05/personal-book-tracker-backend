@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserDAO extends JpaRepository<User, Integer> {
-    Optional<User> findByUsername(String username);
+    Optional<User> findByUsernameAndDeletedAtIsNull(String username);
     Optional<User> findByIdAndDeletedAtIsNull(Integer id);
-    boolean existsByUsername(String username);
+    boolean existsByUsernameAndDeletedAtIsNull(String username);
     @Modifying
     @Query("UPDATE User u SET u.deletedAt=CURRENT_TIMESTAMP WHERE u.id=:id AND u.deletedAt=NULL")
     void deleteByIdAndDeletedAtIsNull(Integer id);

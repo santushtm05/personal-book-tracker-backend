@@ -5,8 +5,11 @@ import com.example.trackerbackend.DTO.request.user.UserCreationRequestDTO;
 import com.example.trackerbackend.DTO.request.user.UserUpdationRequestDTO;
 import com.example.trackerbackend.DTO.response.UserDTO;
 import com.example.trackerbackend.entity.User;
+import com.example.trackerbackend.entity.principal.CustomUserDetails;
 import com.example.trackerbackend.utils.conversion.EntityConversionUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +22,23 @@ public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final PasswordEncoder passwordEncoder;
 
+    private boolean validateRequestedUserId(Integer requestUserId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails =  (CustomUserDetails) authentication.getPrincipal();
+        Integer userId = userDetails.getId();
+        if (requestUserId.equals(userId)) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public UserDTO createUser(UserCreationRequestDTO request) {
 
         // Check duplicate username
-        if (userDAO.existsByUsername(request.getUsername())) {
+        System.out.println("Username In request: "+request.getUsername());
+        System.out.println("Executing CHeck: "+userDAO.existsByUsernameAndDeletedAtIsNull(request.getUsername()));
+        if (userDAO.existsByUsernameAndDeletedAtIsNull(request.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
 
@@ -43,7 +58,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO updateUser(UserUpdationRequestDTO request) {
-
+        if(!validateRequestedUserId(request.getId())) {
+            throw new RuntimeException("Forbidden!");
+        }
         User user = userDAO.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -65,6 +82,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void softDelete(Integer userId) {
+        if(validateRequestedUserId(userId)) {
+            throw new RuntimeException("Forbidden!");
+        }
         // add validation for user deleting himself and not other user
         User user = userDAO.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -95,7 +115,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByUsername(String username) {
-        User userDB = userDAO.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User userDB = userDAO.findByUsernameAndDeletedAtIsNull(username).orElseThrow(() -> new RuntimeException("User not found"));
         return userDB;
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userDAO.existsByUsernameAndDeletedAtIsNull(username);
     }
 }
