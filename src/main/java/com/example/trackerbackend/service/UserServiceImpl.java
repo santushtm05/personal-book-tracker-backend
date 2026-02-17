@@ -29,18 +29,13 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails =  (CustomUserDetails) authentication.getPrincipal();
         Integer userId = userDetails.getId();
-        if (requestUserId.equals(userId)) {
-            return false;
-        }
-        return true;
+        return requestUserId.equals(userId);
     }
 
     @Override
     public UserDTO createUser(UserCreationRequestDTO request) {
 
         // Check duplicate username
-        System.out.println("Username In request: "+request.getUsername());
-        System.out.println("Executing CHeck: "+userDAO.existsByUsernameAndDeletedAtIsNull(request.getUsername()));
         if (userDAO.existsByUsernameAndDeletedAtIsNull(request.getUsername())) {
             throw new DuplicateResourceException("Username");
         }
@@ -60,11 +55,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO updateUser(UserUpdationRequestDTO request) {
-        if(!validateRequestedUserId(request.getId())) {
+    public UserDTO updateUser(UserUpdationRequestDTO request, Integer userId) {
+        if(!validateRequestedUserId(userId)) {
             throw new ForbiddenException("Forbidden!");
         }
-        User user = userDAO.findById(request.getId())
+        User user = userDAO.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getDeletedAt() != null) {
@@ -85,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void softDelete(Integer userId) {
-        if(validateRequestedUserId(userId)) {
+        if(!validateRequestedUserId(userId)) {
             throw new ForbiddenException("Forbidden!");
         }
         User user = userDAO.findById(userId)

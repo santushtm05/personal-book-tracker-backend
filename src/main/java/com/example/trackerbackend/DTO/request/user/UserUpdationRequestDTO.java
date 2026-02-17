@@ -9,7 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UserUpdationRequestDTO {
-    private Integer id;
     @Size(max = 50)
     @JsonProperty("full_name")
     private String fullName;

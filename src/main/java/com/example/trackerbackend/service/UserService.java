@@ -7,7 +7,7 @@ import com.example.trackerbackend.entity.User;
 
 public interface UserService {
     UserDTO createUser(UserCreationRequestDTO userCreationRequestDTO);
-    UserDTO updateUser(UserUpdationRequestDTO userUpdationRequestDTO);
+    UserDTO updateUser(UserUpdationRequestDTO userUpdationRequestDTO, Integer userId);
     void softDelete(Integer userId);
     UserDTO getUserById(Integer userId);
     User getByUsername(String username);

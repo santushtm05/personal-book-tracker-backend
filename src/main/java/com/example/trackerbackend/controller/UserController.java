@@ -21,7 +21,7 @@ public class UserController {
 
     @PatchMapping("/update/{id}")
     public ResponseEntity<APIResponse<UserDTO>> updateUser(@Valid @RequestBody UserUpdationRequestDTO userUpdationRequestDTO, @PathVariable Integer id) {
-        UserDTO updatedUser = this.userService.updateUser(userUpdationRequestDTO);
+        UserDTO updatedUser = this.userService.updateUser(userUpdationRequestDTO, id);
         APIResponse<UserDTO> response = APIResponse.<UserDTO>builder()
                 .success(true)
                 .error(null)

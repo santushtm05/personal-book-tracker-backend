@@ -51,19 +51,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneric(
-            Exception ex,
-            HttpServletRequest request) {
-
-        ApiErrorResponse response = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("Internal server error")
-                .path(request.getRequestURI())
-                .build();
-
-        return ResponseEntity.internalServerError().body(response);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ApiErrorResponse> handleGeneric(
+//            Exception ex,
+//            HttpServletRequest request) {
+//
+//        ApiErrorResponse response = ApiErrorResponse.builder()
+//                .timestamp(LocalDateTime.now())
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+//                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+//                .message("Internal server error")
+//                .path(request.getRequestURI())
+//                .build();
+//
+//        return ResponseEntity.internalServerError().body(response);
+//    }
 }
