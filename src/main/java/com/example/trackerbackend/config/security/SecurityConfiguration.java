@@ -96,7 +96,11 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/register",
-                                "/api/auth/username-available"
+                                "/api/auth/username-available",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/webjars/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,"/*").permitAll()
 

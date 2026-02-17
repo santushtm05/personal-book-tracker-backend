@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 
 @Service
 @RequiredArgsConstructor
@@ -182,6 +186,21 @@ public class BookServiceImpl implements BookService {
 
 
     @Override
+    public List<BookDTO> getBooksByUserId(int page, int size) {
+
+        Integer userId = getAuthenticatedUserId();
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> booksPage =
+                bookDAO.findByUserIdAndDeletedAtIsNull(userId, pageable);
+
+        List<BookDTO> result = new ArrayList<>();
+        for (Book book : booksPage.getContent())
+            result.add(EntityConversionUtils.toBookDTO(book));
+
+        return result;
+    }
+
     public List<BookDTO> getBooksByUserId() {
 
         Integer userId = getAuthenticatedUserId();
@@ -220,16 +239,20 @@ public class BookServiceImpl implements BookService {
         return result;
     }
 
-
     @Override
-    public List<BookDTO> searchBooks(String query) {
+    public List<BookDTO> searchBooks(String query, int page, int size) {
         Integer userId = getAuthenticatedUserId();
-        List<Book> booksFromDB = bookDAO.searchBooks(userId, query);
-        if (booksFromDB.isEmpty())
-            return new ArrayList<>();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Book> booksPage =
+                bookDAO.searchBooks(userId, query, pageable);
+
         List<BookDTO> result = new ArrayList<>();
-        for (Book book : booksFromDB)
+
+        for (Book book : booksPage.getContent())
             result.add(EntityConversionUtils.toBookDTO(book));
+
         return result;
     }
 }

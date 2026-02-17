@@ -14,6 +14,7 @@ public interface BookService {
     BookDTO getBook(Integer id);
     List<BookDTO> getBooksByStatusAndUserId(String status);
     List<BookDTO> getBooksByUserId();
+    List<BookDTO> getBooksByUserId(int page, int size);
     List<BookDTO> getBooksByTagAndUserId(String tag);
-    List<BookDTO> searchBooks(String query);
+    List<BookDTO> searchBooks(String query, int page, int size);
 }

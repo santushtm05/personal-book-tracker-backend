@@ -24,8 +24,10 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping("/")
-    public ResponseEntity<APIResponse<List<BookDTO>>> getAllBooks() {
-        List<BookDTO> books = bookService.getBooksByUserId();
+    public ResponseEntity<APIResponse<List<BookDTO>>> getAllBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        List<BookDTO> books = bookService.getBooksByUserId(page, size);
         APIResponse<List<BookDTO>> response = APIResponse.<List<BookDTO>>builder()
                 .data(books)
                 .success(true)
@@ -102,15 +104,19 @@ public class BookController {
     }
 
     @GetMapping("/search/")
-    public ResponseEntity<APIResponse<List<BookDTO>>> getBooksBySearch(@RequestParam String query) {
-        List<BookDTO> books = this.bookService.searchBooks(query);
+    public ResponseEntity<APIResponse<List<BookDTO>>> getBooksBySearch(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        List<BookDTO> books = this.bookService.searchBooks(query, page, size);
+
         APIResponse<List<BookDTO>> response = APIResponse.<List<BookDTO>>builder()
                 .data(books)
                 .success(true)
-                .message(null)
                 .timestamp(LocalDateTime.now())
-                .error(null)
                 .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        return ResponseEntity.ok(response);
     }
 }

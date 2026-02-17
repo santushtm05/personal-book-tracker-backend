@@ -9,10 +9,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface BookDAO extends JpaRepository<Book, Integer> {
     List<Book> findByUserIdAndDeletedAtIsNull(Integer userId);
+    Page<Book> findByUserIdAndDeletedAtIsNull(Integer userId, Pageable pageable);
     Optional<Book> findByIdAndUserIdAndDeletedAtIsNull(Integer bookId, Integer userId);
     List<Book> findByUserIdAndStatusAndDeletedAtIsNull(Integer userId, BookStatus status);
     List<Book> findByUserIdAndTagsContainingAndDeletedAtIsNull(Integer userId, String tag);
@@ -27,5 +30,5 @@ public interface BookDAO extends JpaRepository<Book, Integer> {
             OR LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%'))
         ) AND b.deletedAt IS NULL
     """)
-    List<Book> searchBooks(Integer userId, String query);
+    Page<Book> searchBooks(Integer userId, String query, Pageable pageable);
 }
