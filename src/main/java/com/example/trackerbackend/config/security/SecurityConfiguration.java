@@ -95,7 +95,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(config -> config
                         .requestMatchers(
                                 "/api/auth/login",
-                                "/api/auth/logout"
+                                "/api/auth/register"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,"/*").permitAll()
 

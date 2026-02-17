@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = User.builder()
+                .id(null)
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void softDelete(Integer userId) {
-
+        // add validation for user deleting himself and not other user
         User user = userDAO.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
