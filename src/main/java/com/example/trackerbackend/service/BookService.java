@@ -3,6 +3,7 @@ package com.example.trackerbackend.service;
 import com.example.trackerbackend.DTO.request.book.BookCreationRequestDTO;
 import com.example.trackerbackend.DTO.request.book.BookUpdationRequestDTO;
 import com.example.trackerbackend.DTO.response.BookDTO;
+import com.example.trackerbackend.entity.Book;
 
 import java.util.List;
 
@@ -14,4 +15,5 @@ public interface BookService {
     List<BookDTO> getBooksByStatusAndUserId(String status);
     List<BookDTO> getBooksByUserId();
     List<BookDTO> getBooksByTagAndUserId(String tag);
+    List<BookDTO> searchBooks(String query);
 }

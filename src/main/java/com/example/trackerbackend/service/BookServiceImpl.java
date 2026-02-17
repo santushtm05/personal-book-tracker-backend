@@ -12,7 +12,6 @@ import com.example.trackerbackend.entity.Tag;
 import com.example.trackerbackend.entity.User;
 import com.example.trackerbackend.entity.principal.CustomUserDetails;
 import com.example.trackerbackend.exception.ResourceNotFoundException;
-import com.example.trackerbackend.exception.UnauthorizedException;
 import com.example.trackerbackend.exception.ValidationException;
 import com.example.trackerbackend.utils.conversion.EntityConversionUtils;
 import jakarta.transaction.Transactional;
@@ -36,23 +35,16 @@ public class BookServiceImpl implements BookService {
     private final BookStatusHistoryService historyService;
     private final TagDAO tagDAO;
 
-    private User getAuthenticatedUser() {
+    private Integer getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails =  (CustomUserDetails) authentication.getPrincipal();
-        Integer userId = userDetails.getId();
-        return userDAO.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User"));
+        return userDetails.getId();
     }
 
-    private Book getUserOwnedBook(Integer bookId, User user) {
-        Book book = bookDAO.findById(bookId).orElseThrow(() -> new ResourceNotFoundException("Book"));
-        if (!book.getUser().getId().equals(user.getId()))
-            throw new UnauthorizedException("Unauthorized Access!");
-        if (book.getDeletedAt() != null)
-            throw new ResourceNotFoundException("Book");
+    private Book getUserOwnedBook(Integer bookId, Integer userId) {
+        Book book = bookDAO.findByIdAndUserIdAndDeletedAtIsNull(bookId, userId).orElseThrow(() -> new ResourceNotFoundException("Book"));
         return book;
     }
-
 
     private BookStatus applyBookUpdates(Book book, BookUpdationRequestDTO request) {
 
@@ -93,8 +85,10 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public BookDTO createBook(BookCreationRequestDTO request) {
         //check for blank book name and throw exception
-        User user = getAuthenticatedUser();
+        if(request.getTitle().isEmpty() || request.getAuthor().isEmpty()) throw new ValidationException("All fields are required!");
 
+        Integer userId = getAuthenticatedUserId();
+        User userDB = userDAO.findByIdAndDeletedAtIsNull(userId).orElseThrow(() -> new ResourceNotFoundException("User"));
         Book book = Book.builder()
                 .id(null)
                 .title(request.getTitle())
@@ -105,7 +99,7 @@ public class BookServiceImpl implements BookService {
                 .thumbnailUrl(request.getThumbnailUrl())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .user(user)
+                .user(userDB)
                 .build();
 
         // Set Tags for book
@@ -129,8 +123,8 @@ public class BookServiceImpl implements BookService {
         if (bookId == null)
             throw new ValidationException("Book id is required");
 
-        User user = getAuthenticatedUser();
-        Book book = getUserOwnedBook(bookId, user);
+        Integer userId = getAuthenticatedUserId();
+        Book book = getUserOwnedBook(bookId, userId);
         BookStatus oldStatus = applyBookUpdates(book, request);
         book = bookDAO.save(book);
 
@@ -151,23 +145,23 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public void deleteBook(Integer id) {
-        User user = getAuthenticatedUser();
-        Book book = getUserOwnedBook(id, user);
+        Integer userId = getAuthenticatedUserId();
+        Book book = getUserOwnedBook(id, userId);
         book.setDeletedAt(LocalDateTime.now());
         bookDAO.save(book);
     }
 
     @Override
     public BookDTO getBook(Integer id) {
-        User user = getAuthenticatedUser();
-        Book book = getUserOwnedBook(id, user);
+        Integer userId = getAuthenticatedUserId();
+        Book book = getUserOwnedBook(id, userId);
         return EntityConversionUtils.toBookDTO(book);
     }
 
     @Override
     public List<BookDTO> getBooksByStatusAndUserId(String status) {
 
-        User user = getAuthenticatedUser();
+        Integer userId = getAuthenticatedUserId();
 
         BookStatus bookStatus;
         try {
@@ -176,7 +170,7 @@ public class BookServiceImpl implements BookService {
             throw new ValidationException("Invalid book status");
         }
         List<Book> booksFromDB =
-                bookDAO.findByUserIdAndStatus(user.getId(), bookStatus);
+                bookDAO.findByUserIdAndStatusAndDeletedAtIsNull(userId, bookStatus);
         if (booksFromDB.isEmpty())
             return  new  ArrayList<>();
         List<BookDTO> result = new ArrayList<>();
@@ -190,10 +184,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDTO> getBooksByUserId() {
 
-        User user = getAuthenticatedUser();
+        Integer userId = getAuthenticatedUserId();
 
         List<Book> booksFromDB =
-                bookDAO.findByUserId(user.getId());
+                bookDAO.findByUserIdAndDeletedAtIsNull(userId);
 
         if (booksFromDB.isEmpty())
             return new   ArrayList<>();
@@ -210,10 +204,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDTO> getBooksByTagAndUserId(String tag) {
 
-        User user = getAuthenticatedUser();
+        Integer userId = getAuthenticatedUserId();
 
         List<Book> booksFromDB =
-                bookDAO.findByUserIdAndTagsContaining(user.getId(), tag);
+                bookDAO.findByUserIdAndTagsContainingAndDeletedAtIsNull(userId, tag);
 
         if (booksFromDB.isEmpty())
             return new ArrayList<>();
@@ -223,6 +217,19 @@ public class BookServiceImpl implements BookService {
         for (Book book : booksFromDB)
             result.add(EntityConversionUtils.toBookDTO(book));
 
+        return result;
+    }
+
+
+    @Override
+    public List<BookDTO> searchBooks(String query) {
+        Integer userId = getAuthenticatedUserId();
+        List<Book> booksFromDB = bookDAO.searchBooks(userId, query);
+        if (booksFromDB.isEmpty())
+            return new ArrayList<>();
+        List<BookDTO> result = new ArrayList<>();
+        for (Book book : booksFromDB)
+            result.add(EntityConversionUtils.toBookDTO(book));
         return result;
     }
 }
