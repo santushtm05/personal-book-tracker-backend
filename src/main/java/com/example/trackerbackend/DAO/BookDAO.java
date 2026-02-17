@@ -25,7 +25,7 @@ public interface BookDAO extends JpaRepository<Book, Integer> {
         AND (
             LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%'))
             OR LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%'))
-        ) AND b.deletedAt=NULL
+        ) AND b.deletedAt IS NULL
     """)
     List<Book> searchBooks(Integer userId, String query);
 }
