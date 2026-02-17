@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,30 +19,20 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public TagDTO createTag(TagCreationRequestDTO tagCreationRequestDTO) {
-        //check for blank tag name and throw exception
+        // check for blank tag name and throw exception
         Tag tagDB = tagDAO.findByName(
-                tagCreationRequestDTO.getName()
-        ).orElse(
-                tagDAO.save(
-                        Tag.builder()
-                                .id(null)
-                                .name(tagCreationRequestDTO.getName())
-                                .build()
-                )
-        );
+                tagCreationRequestDTO.getName()).orElse(
+                        tagDAO.save(
+                                Tag.builder()
+                                        .id(null)
+                                        .name(tagCreationRequestDTO.getName())
+                                        .build()));
         return EntityConversionUtils.toTagDTO(tagDB);
     }
 
     @Override
     public List<TagDTO> getTags() {
         List<Tag> tagsDB = tagDAO.findAll();
-        if(tagsDB.isEmpty()){
-            return new ArrayList<>();
-        }
-        List<TagDTO> tagsDTO = new ArrayList<>();
-        for(Tag tag : tagsDB) {
-            tagsDTO.add(EntityConversionUtils.toTagDTO(tag));
-        }
-        return tagsDTO;
+        return EntityConversionUtils.toTagDTOs(tagsDB);
     }
 }

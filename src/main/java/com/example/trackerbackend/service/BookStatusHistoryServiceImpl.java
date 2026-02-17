@@ -6,12 +6,13 @@ import com.example.trackerbackend.entity.Book;
 import com.example.trackerbackend.entity.BookStatus;
 import com.example.trackerbackend.entity.BookStatusHistory;
 import com.example.trackerbackend.exception.ResourceNotFoundException;
+import com.example.trackerbackend.utils.conversion.EntityConversionUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -37,45 +38,20 @@ public class BookStatusHistoryServiceImpl implements BookStatusHistoryService {
     @Override
     public List<BookStatusHistoryResponseDTO> getHistoryByBook(Integer bookId) {
 
-        List<BookStatusHistory> historyList =
-                historyDAO.findByBookIdOrderByChangedAtDesc(bookId);
+        List<BookStatusHistory> historyList = historyDAO.findByBookIdOrderByChangedAtDesc(bookId);
 
-        List<BookStatusHistoryResponseDTO> responseList = new ArrayList<>();
-
-        for (BookStatusHistory history : historyList) {
-            responseList.add(mapToDTO(history));
-        }
-
-        return responseList;
+        return EntityConversionUtils.toBookStatusHistoryResponseDTOs(historyList);
     }
 
     @Override
     public BookStatusHistoryResponseDTO getLatestStatusChange(Integer bookId) {
 
-        Optional<BookStatusHistory> optionalHistory =
-                historyDAO.findTopByBookIdOrderByChangedAtDesc(bookId);
+        Optional<BookStatusHistory> optionalHistory = historyDAO.findTopByBookIdOrderByChangedAtDesc(bookId);
 
         if (optionalHistory.isPresent()) {
-            return mapToDTO(optionalHistory.get());
+            return EntityConversionUtils.toBookStatusHistoryResponseDTO(optionalHistory.get());
         }
 
         throw new ResourceNotFoundException("Book status history");
-    }
-
-    private BookStatusHistoryResponseDTO mapToDTO(BookStatusHistory history) {
-
-        String oldStatus = null;
-
-        if (history.getOldStatus() != null) {
-            oldStatus = history.getOldStatus().name();
-        }
-
-        return BookStatusHistoryResponseDTO.builder()
-                .id(history.getId())
-                .bookId(history.getBook().getId())
-                .oldStatus(oldStatus)
-                .newStatus(history.getNewStatus().name())
-                .changedAt(history.getChangedAt())
-                .build();
     }
 }

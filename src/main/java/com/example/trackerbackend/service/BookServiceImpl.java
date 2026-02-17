@@ -21,14 +21,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 
 @Service
 @RequiredArgsConstructor
@@ -41,12 +40,13 @@ public class BookServiceImpl implements BookService {
 
     private Integer getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails =  (CustomUserDetails) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         return userDetails.getId();
     }
 
     private Book getUserOwnedBook(Integer bookId, Integer userId) {
-        Book book = bookDAO.findByIdAndUserIdAndDeletedAtIsNull(bookId, userId).orElseThrow(() -> new ResourceNotFoundException("Book"));
+        Book book = bookDAO.findByIdAndUserIdAndDeletedAtIsNull(bookId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book"));
         return book;
     }
 
@@ -74,9 +74,9 @@ public class BookServiceImpl implements BookService {
             book.setThumbnailUrl(request.getThumbnailUrl());
         if (request.getCompletedAt() != null)
             book.setCompletedAt(request.getCompletedAt());
-        if(request.getTagIds() != null) {
+        if (request.getTagIds() != null) {
             Set<Tag> tags = new HashSet<>();
-            for(int tagId : request.getTagIds()) {
+            for (int tagId : request.getTagIds()) {
                 tags.add(tagDAO.findById(tagId).orElseThrow(() -> new ResourceNotFoundException("Tag")));
             }
             book.setTags(tags);
@@ -88,11 +88,13 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public BookDTO createBook(BookCreationRequestDTO request) {
-        //check for blank book name and throw exception
-        if(request.getTitle().isEmpty() || request.getAuthor().isEmpty()) throw new ValidationException("All fields are required!");
+        // check for blank book name and throw exception
+        if (request.getTitle().isEmpty() || request.getAuthor().isEmpty())
+            throw new ValidationException("All fields are required!");
 
         Integer userId = getAuthenticatedUserId();
-        User userDB = userDAO.findByIdAndDeletedAtIsNull(userId).orElseThrow(() -> new ResourceNotFoundException("User"));
+        User userDB = userDAO.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
         Book book = Book.builder()
                 .id(null)
                 .title(request.getTitle())
@@ -108,12 +110,12 @@ public class BookServiceImpl implements BookService {
 
         // Set Tags for book
         Set<Tag> tags = new HashSet<>();
-        for(int tagId : request.getTagIds()){
+        for (int tagId : request.getTagIds()) {
             Tag tag = tagDAO.findById(tagId).orElseThrow(() -> new ResourceNotFoundException("Tag"));
             tags.add(tag);
         }
         book.setTags(tags);
-        //saving book to DB
+        // saving book to DB
         book = bookDAO.save(book);
         // Record initial status
         historyService.recordStatusChange(book, BookStatus.CREATED, book.getStatus());
@@ -139,8 +141,7 @@ public class BookServiceImpl implements BookService {
             historyService.recordStatusChange(
                     book,
                     oldStatus,
-                    book.getStatus()
-            );
+                    book.getStatus());
         }
 
         return EntityConversionUtils.toBookDTO(book);
@@ -173,17 +174,9 @@ public class BookServiceImpl implements BookService {
         } catch (IllegalArgumentException ex) {
             throw new ValidationException("Invalid book status");
         }
-        List<Book> booksFromDB =
-                bookDAO.findByUserIdAndStatusAndDeletedAtIsNull(userId, bookStatus);
-        if (booksFromDB.isEmpty())
-            return  new  ArrayList<>();
-        List<BookDTO> result = new ArrayList<>();
-        for (Book book : booksFromDB)
-            result.add(EntityConversionUtils.toBookDTO(book));
-
-        return result;
+        List<Book> booksFromDB = bookDAO.findByUserIdAndStatusAndDeletedAtIsNull(userId, bookStatus);
+        return EntityConversionUtils.toBookDTOs(booksFromDB);
     }
-
 
     @Override
     public List<BookDTO> getBooksByUserId(int page, int size) {
@@ -191,52 +184,28 @@ public class BookServiceImpl implements BookService {
         Integer userId = getAuthenticatedUserId();
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Book> booksPage =
-                bookDAO.findByUserIdAndDeletedAtIsNull(userId, pageable);
+        Page<Book> booksPage = bookDAO.findByUserIdAndDeletedAtIsNull(userId, pageable);
 
-        List<BookDTO> result = new ArrayList<>();
-        for (Book book : booksPage.getContent())
-            result.add(EntityConversionUtils.toBookDTO(book));
-
-        return result;
+        return EntityConversionUtils.toBookDTOs(booksPage.getContent());
     }
 
     public List<BookDTO> getBooksByUserId() {
 
         Integer userId = getAuthenticatedUserId();
 
-        List<Book> booksFromDB =
-                bookDAO.findByUserIdAndDeletedAtIsNull(userId);
+        List<Book> booksFromDB = bookDAO.findByUserIdAndDeletedAtIsNull(userId);
 
-        if (booksFromDB.isEmpty())
-            return new   ArrayList<>();
-
-        List<BookDTO> result = new ArrayList<>();
-
-        for (Book book : booksFromDB)
-            result.add(EntityConversionUtils.toBookDTO(book));
-
-        return result;
+        return EntityConversionUtils.toBookDTOs(booksFromDB);
     }
-
 
     @Override
     public List<BookDTO> getBooksByTagAndUserId(String tag) {
 
         Integer userId = getAuthenticatedUserId();
 
-        List<Book> booksFromDB =
-                bookDAO.findByUserIdAndTagsContainingAndDeletedAtIsNull(userId, tag);
+        List<Book> booksFromDB = bookDAO.findByUserIdAndTagsContainingAndDeletedAtIsNull(userId, tag);
 
-        if (booksFromDB.isEmpty())
-            return new ArrayList<>();
-
-        List<BookDTO> result = new ArrayList<>();
-
-        for (Book book : booksFromDB)
-            result.add(EntityConversionUtils.toBookDTO(book));
-
-        return result;
+        return EntityConversionUtils.toBookDTOs(booksFromDB);
     }
 
     @Override
@@ -245,14 +214,8 @@ public class BookServiceImpl implements BookService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Book> booksPage =
-                bookDAO.searchBooks(userId, query, pageable);
+        Page<Book> booksPage = bookDAO.searchBooks(userId, query, pageable);
 
-        List<BookDTO> result = new ArrayList<>();
-
-        for (Book book : booksPage.getContent())
-            result.add(EntityConversionUtils.toBookDTO(book));
-
-        return result;
+        return EntityConversionUtils.toBookDTOs(booksPage.getContent());
     }
 }
