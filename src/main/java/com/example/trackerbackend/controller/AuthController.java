@@ -121,4 +121,19 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/username-available")
+    public ResponseEntity<APIResponse<Boolean>> isUsernameAvailable(
+            @RequestParam String username
+    ) {
+        boolean available = userService.existsByUsername(username);
+        APIResponse<Boolean> response = APIResponse.<Boolean>builder()
+                .success(true)
+                .error(null)
+                .message(available ? "Username Not Available!" : "Username Available!")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
