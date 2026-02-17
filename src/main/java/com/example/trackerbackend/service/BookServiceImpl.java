@@ -89,10 +89,11 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public BookDTO createBook(BookCreationRequestDTO request) {
-
+        //check for blank book name and throw exception
         User user = getAuthenticatedUser();
 
         Book book = Book.builder()
+                .id(null)
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .status(BookStatus.valueOf(request.getStatus()))
@@ -114,19 +115,19 @@ public class BookServiceImpl implements BookService {
         //saving book to DB
         book = bookDAO.save(book);
         // Record initial status
-        historyService.recordStatusChange(book, null, book.getStatus());
+        historyService.recordStatusChange(book, BookStatus.CREATED, book.getStatus());
 
         return EntityConversionUtils.toBookDTO(book);
     }
 
     @Override
     @Transactional
-    public BookDTO updateBook(BookUpdationRequestDTO request) {
-        if (request.getId() == null)
+    public BookDTO updateBook(BookUpdationRequestDTO request, Integer bookId) {
+        if (bookId == null)
             throw new RuntimeException("Book id is required");
 
         User user = getAuthenticatedUser();
-        Book book = getUserOwnedBook(request.getId(), user);
+        Book book = getUserOwnedBook(bookId, user);
         BookStatus oldStatus = applyBookUpdates(book, request);
         book = bookDAO.save(book);
 

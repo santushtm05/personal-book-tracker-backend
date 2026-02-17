@@ -23,7 +23,8 @@ public class BookDTO {
     private Float rating;
     private Integer pages;
     private String description;
-    private Set<Tag> tags;
+    @JsonProperty("tags")
+    private Set<TagDTO> tags;
     @JsonProperty("thumbnail_url")
     private String thumbnailUrl;
     @JsonProperty("completed_at")

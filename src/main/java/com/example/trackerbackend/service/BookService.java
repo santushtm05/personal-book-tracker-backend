@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface BookService {
     BookDTO createBook(BookCreationRequestDTO bookCreationRequestDTO);
-    BookDTO updateBook(BookUpdationRequestDTO bookUpdationRequestDTO);
+    BookDTO updateBook(BookUpdationRequestDTO bookUpdationRequestDTO, Integer bookId);
     void deleteBook(Integer id);
     BookDTO getBook(Integer id);
     List<BookDTO> getBooksByStatusAndUserId(String status);

@@ -16,6 +16,7 @@ public class BookCreationRequestDTO {
     private String status;
     private Float rating;
     private Integer pages;
+    @JsonProperty("thumbnail_url")
     private String thumbnailUrl;
     @JsonProperty("tags")
     private List<Integer> tagIds;
