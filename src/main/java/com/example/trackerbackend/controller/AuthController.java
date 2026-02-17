@@ -3,8 +3,10 @@ package com.example.trackerbackend.controller;
 import com.example.trackerbackend.DTO.request.auth.LoginRequest;
 import com.example.trackerbackend.DTO.request.user.UserCreationRequestDTO;
 import com.example.trackerbackend.DTO.response.APIResponse;
+import com.example.trackerbackend.DTO.response.UserDTO;
 import com.example.trackerbackend.DTO.response.auth.LoginResponse;
 import com.example.trackerbackend.entity.User;
+import com.example.trackerbackend.entity.principal.CustomUserDetails;
 import com.example.trackerbackend.service.AuthService;
 import com.example.trackerbackend.service.UserService;
 import com.example.trackerbackend.utils.security.JwtUtil;
@@ -14,10 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
 
 
@@ -96,5 +98,27 @@ public class AuthController {
         authService.logout(token);
         response.setMessage("Logged Out Successfully!");
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<APIResponse<UserDTO>> getCurrentUser() {
+
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer userId = userDetails.getId();
+
+        UserDTO userDB = userService.getUserById(userId);
+
+        APIResponse<UserDTO> response = APIResponse.<UserDTO>builder()
+                .success(true)
+                .data(userDB)
+                .error(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }
