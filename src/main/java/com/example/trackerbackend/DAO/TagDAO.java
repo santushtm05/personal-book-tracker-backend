@@ -2,6 +2,7 @@ package com.example.trackerbackend.DAO;
 
 import com.example.trackerbackend.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -14,4 +15,6 @@ public interface TagDAO extends JpaRepository<Tag,Integer> {
     Optional<Tag> findById(Integer id);
     boolean existsByName(String name);
     List<Tag> findAllByNameIn(Collection<String> names);
+    Tag save(Tag tag);
+    List<Tag> findAll();
 }
