@@ -1,6 +1,8 @@
 package com.example.trackerbackend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,11 +24,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
+
     @Column(nullable = false, length = 65)
     private String password;
+
 
     @Column(name = "full_name", nullable = false, length = 50)
     private String fullName;

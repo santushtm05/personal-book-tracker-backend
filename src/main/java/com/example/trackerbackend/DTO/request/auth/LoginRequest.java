@@ -1,6 +1,7 @@
+
 package com.example.trackerbackend.DTO.request.auth;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter
@@ -9,8 +10,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class LoginRequest {
-    @JsonProperty("username")
+
+    @NotBlank(message = "Username is required")
     private String username;
-    @JsonProperty("password")
+
+    @NotBlank(message = "Password is required")
     private String password;
 }

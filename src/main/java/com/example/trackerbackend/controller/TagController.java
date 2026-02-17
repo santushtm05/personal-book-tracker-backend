@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +34,7 @@ public class TagController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<APIResponse<TagDTO>> createTag(@RequestBody TagCreationRequestDTO tagCreationRequestDTO) {
+    public ResponseEntity<APIResponse<TagDTO>> createTag(@Valid @RequestBody TagCreationRequestDTO tagCreationRequestDTO) {
         TagDTO createdTag = this.tagService.createTag(tagCreationRequestDTO);
         APIResponse<TagDTO> response = APIResponse.<TagDTO>builder()
                 .success(true)

@@ -1,31 +1,48 @@
+
 package com.example.trackerbackend.DTO.request.book;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class BookUpdationRequestDTO {
+
+    @Size(max = 255)
     private String title;
+
+    @Size(max = 255)
     private String author;
+
     private String status;
+
+    @Min(0)
+    @Max(5)
     private Float rating;
+
+    @Min(value = 1, message = "Pages must be greater than 0")
     private Integer pages;
-    private Set<Integer> tagIds;
+
+    @Size(max = 512)
+    private String description;
+
+    @Size(max = 512)
     @JsonProperty("thumbnail_url")
     private String thumbnailUrl;
+
     @JsonProperty("started_at")
     private LocalDateTime startedAt;
+
     @JsonProperty("completed_at")
     private LocalDateTime completedAt;
+
+    @JsonProperty("tags")
+    private Set<Integer> tagIds;
 }

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +50,7 @@ public class BookController {
     }
 
     @PatchMapping("/update/{id}")
-    public ResponseEntity<APIResponse<BookDTO>> updateBook(@PathVariable Integer id, @RequestBody BookUpdationRequestDTO bookUpdationRequestDTO) {
+    public ResponseEntity<APIResponse<BookDTO>> updateBook(@PathVariable Integer id, @Valid @RequestBody BookUpdationRequestDTO bookUpdationRequestDTO) {
         BookDTO updatedBook = this.bookService.updateBook(bookUpdationRequestDTO, id);
         APIResponse<BookDTO> response = APIResponse.<BookDTO>builder()
                 .success(true)
@@ -62,7 +63,7 @@ public class BookController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<APIResponse<BookDTO>> createBook(@RequestBody BookCreationRequestDTO bookCreationRequestDTO) {
+    public ResponseEntity<APIResponse<BookDTO>> createBook(@Valid @RequestBody BookCreationRequestDTO bookCreationRequestDTO) {
         BookDTO createdBook = this.bookService.createBook(bookCreationRequestDTO);
         APIResponse<BookDTO> response = APIResponse.<BookDTO>builder()
                 .success(true)
@@ -90,6 +91,19 @@ public class BookController {
     @GetMapping("/status/")
     public ResponseEntity<APIResponse<List<BookDTO>>> getBooksByStatus(@RequestParam String status) {
         List<BookDTO> books = this.bookService.getBooksByStatusAndUserId(status);
+        APIResponse<List<BookDTO>> response = APIResponse.<List<BookDTO>>builder()
+                .data(books)
+                .success(true)
+                .message(null)
+                .timestamp(LocalDateTime.now())
+                .error(null)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/search/")
+    public ResponseEntity<APIResponse<List<BookDTO>>> getBooksBySearch(@RequestParam String query) {
+        List<BookDTO> books = this.bookService.searchBooks(query);
         APIResponse<List<BookDTO>> response = APIResponse.<List<BookDTO>>builder()
                 .data(books)
                 .success(true)

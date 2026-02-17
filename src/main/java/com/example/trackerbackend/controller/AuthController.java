@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 
@@ -33,7 +34,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<APIResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest) throws Exception {
+    public ResponseEntity<APIResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest) throws Exception {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -67,7 +68,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<APIResponse<String>> register(@RequestBody UserCreationRequestDTO request){
+    public ResponseEntity<APIResponse<String>> register(@Valid @RequestBody UserCreationRequestDTO request){
         this.userService.createUser(request);
         APIResponse<String> response = APIResponse.<String>builder()
                 .success(true)

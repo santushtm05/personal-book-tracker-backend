@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @PatchMapping("/update/{id}")
-    public ResponseEntity<APIResponse<UserDTO>> updateUser(@RequestBody UserUpdationRequestDTO userUpdationRequestDTO, @PathVariable Integer id) {
+    public ResponseEntity<APIResponse<UserDTO>> updateUser(@Valid @RequestBody UserUpdationRequestDTO userUpdationRequestDTO, @PathVariable Integer id) {
         UserDTO updatedUser = this.userService.updateUser(userUpdationRequestDTO);
         APIResponse<UserDTO> response = APIResponse.<UserDTO>builder()
                 .success(true)
