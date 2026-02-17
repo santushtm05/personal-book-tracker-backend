@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class BookStatusHistory {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
